@@ -6,19 +6,13 @@
   "author": "",
   "type": "commonjs",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "mocha",
-    "build:dev": "webpack --config webpack.dev.js",
-    "build:prod": "webpack --config webpack.prod.js"
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
-    "mocha": "^11.4.0",
-    "ts-loader": "^9.5.2",
-    "typescript": "^5.8.3",
-    "webpack": "^5.99.9",
-    "webpack-cli": "^6.0.1"
+    "@vitest/ui": "^4.1.5",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   }
 }
