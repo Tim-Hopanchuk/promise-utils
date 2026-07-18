@@ -1,85 +1,120 @@
-# promiseUtils
+# promise-utils
 
-**promiseUtils** is a small utility library for working with asynchronous logic in JavaScript/TypeScript.  
-Includes tools for delaying execution, retrying operations, handling timeouts, and executing sequences with delays.
+Lightweight, dependency-free TypeScript utilities for working with promises: delay execution, enforce timeouts, retry failing tasks, and run tasks sequentially with a pause between them.
+
+## Tech Stack
+
+- **TypeScript**
+- **Vitest**
 
 ## Features
 
-- Delay execution with `sleep()`
-- Timeout async operations using `wait()`
-- Recurring sync checks with `waitFor()`
-- Run async/sync callbacks sequentially with delays using `doCallbacks()`
+- **`delay`** pause execution for a given number of milliseconds.
+- **`timeout`** reject a task if it takes too long to complete.
+- **`retry`** automatically retry a failing task up to a max number of attempts.
+- **`sequence`** run an array of tasks one after another with a delay between them.
 
-## Technologies Used
-
-- JavaScript
-- TypeScript
-- Git
-- Mocha
-- Webpack
-
-## API
-
-### `sleep()`
-
-Returns a promise that resolves after the specified timeout.
+## Usage
 
 ```ts
-function sleep(timeout: number): Promise<void>;
-
-// Example
-await sleep(1000); // waits for 1 second
+import { delay, timeout, retry, sequence } from "promise-utils";
 ```
 
-### `wait()`
+### `delay`
 
-Executes an async callback and returns a promise that resolves with its result.
-Rejects if the timeout is reached first.
+Pauses execution for a specified number of milliseconds.
 
 ```ts
-function wait<T>(
-  callback: () => Promise<T>,
-  timeout: number
-): Promise<string | T>;
-
-// Example
-await wait(() => fetch("/api/data"), 2000);
+await delay(1000);
 ```
 
-### `waitFor()`
-
-Calls a sync function repeatedly with a delay between calls, until it returns true 
-or the maximum number of attempts is reached.
+**Signature**
 
 ```ts
-function waitFor(
-  callback: () => boolean,
-  timeout: number,
-  tries: number
-): Promise<string>;
-
-// Example
-await waitFor(() => document.readyState === "complete", 500, 10);
+function delay(delayMs: number): Promise<void>
 ```
 
-### `doCallbacks()`
+| Parameter | Type     | Description                       |
+| --------- | -------- | ---------------------------------- |
+| `delayMs` | `number` | Duration to wait, in milliseconds |
 
-Executes an array of async/sync callbacks one after another, with a delay between each. 
-Rejects if any callback throws error or returns a rejected promise.
+---
+
+### `timeout`
+
+Executes a task and rejects if it fails to complete within the specified timeout.
 
 ```ts
-function doCallbacks<T>(
-  callbacks: Array<() => T | Promise<T>>,
-  timeout: number
-): Promise<string | T>;
+const result = await timeout(() => fetchData(), 500);
+```
 
-// Example
-await doCallbacks(
-  [
-    () => console.log("Step 1"),
-    () => fetch("/api/step2"),
-    () => new Promise((resolve) => setTimeout(resolve, 100)),
-  ],
+**Signature**
+
+```ts
+function timeout<T>(
+  task: () => Promise<T> | T,
+  timeoutMs: number
+): Promise<T>
+```
+
+| Parameter   | Type                        | Description                              |
+| ----------- | --------------------------- | ----------------------------------------- |
+| `task`      | `() => Promise<T> \| T`     | The function to execute                   |
+| `timeoutMs` | `number`                    | Maximum allowed execution time, in ms      |
+
+**Throws:** `Error("Timeout exceeded")` if the time limit is reached.
+
+---
+
+### `retry`
+
+Repeatedly attempts to execute a task until it succeeds or hits the retry limit.
+
+```ts
+const result = await retry(() => unstableRequest(), 3, 500);
+```
+
+**Signature**
+
+```ts
+function retry<T>(
+  task: () => Promise<T> | T,
+  maxRetries: number,
+  delayMs: number
+): Promise<T>
+```
+
+| Parameter    | Type                     | Description                                   |
+| ------------ | ------------------------ | ---------------------------------------------- |
+| `task`       | `() => Promise<T> \| T`  | The function to execute                        |
+| `maxRetries` | `number`                 | Maximum number of attempts before throwing      |
+| `delayMs`    | `number`                 | Time to wait between attempts, in milliseconds |
+
+**Throws:** rethrows the last encountered error if the maximum number of retries is reached.
+
+---
+
+### `sequence`
+
+Executes an array of tasks sequentially, pausing for a specific duration between each.
+
+```ts
+const results = await sequence(
+  [() => step1(), () => step2(), () => step3()],
   1000
 );
 ```
+
+**Signature**
+
+```ts
+function sequence<T>(
+  tasks: (() => Promise<T> | T)[],
+  delayMs: number
+): Promise<T[]>
+```
+
+| Parameter | Type                       | Description                                       |
+| --------- | -------------------------- | --------------------------------------------------- |
+| `tasks`   | `(() => Promise<T> \| T)[]` | Array of functions to execute in order              |
+| `delayMs` | `number`                   | Wait time between the end of one task and the next |
