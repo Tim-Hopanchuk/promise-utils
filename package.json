@@ -1,11 +1,10 @@
 {
   "name": "promise-utils",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "Lightweight, dependency-free TypeScript utilities for working with promises: delay execution, enforce timeouts, retry failing tasks, and run tasks sequentially with a pause between them.",
   "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "index.js",
+  "author": "Tim-Hopanchuk",
+  "type": "module",
   "scripts": {
     "test": "vitest",
     "test:ui": "vitest --ui"
